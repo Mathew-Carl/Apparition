@@ -3,261 +3,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apparition!</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>幻影显形 - WPS 自动打卡</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: url('https://images.unsplash.com/photo-1519682577862-22b62b24e493?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
-            background-size: cover;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Times New Roman', serif;
-            color: #fff;
+            padding: 20px;
         }
-        .navbar {
-            background: rgba(0, 0, 0, 0.8) !important;
-            border-bottom: 2px solid #ffd700;
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
-        .navbar-brand {
-            color: #ffd700 !important;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
+
         .card {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-            margin-bottom: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
-        .card-header {
-            background: rgba(0, 0, 0, 0.8);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-            color: #ffd700;
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
         }
-        .table {
-            color: #fff;
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
-        .table thead th {
-            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
-            color: #ffd700;
+
+        /* 扫码区域 */
+        .qrcode-section {
+            text-align: center;
         }
-        .table td {
-            border-color: rgba(255, 215, 0, 0.1);
+
+        .qrcode-wrapper {
+            display: inline-block;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 15px 0;
         }
+
+        .qrcode-wrapper img {
+            width: 180px;
+            height: 180px;
+            border-radius: 8px;
+        }
+
+        .qrcode-placeholder {
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9ecef;
+            border-radius: 8px;
+            color: #6c757d;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .status-text.success { color: #28a745; }
+        .status-text.error { color: #dc3545; }
+
+        /* 按钮 */
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
         .btn-primary {
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            border: none;
-            color: #000;
-            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
+
         .btn-primary:hover {
-            background: linear-gradient(45deg, #ffa500, #ffd700);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-        .btn-danger {
-            background: linear-gradient(45deg, #dc3545, #c82333);
-            border: none;
+
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-block { width: 100%; display: block; }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 15px;
         }
-        .badge {
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
         }
-        .modal-content {
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: #fff;
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: border-color 0.3s;
         }
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        .modal-footer {
-            border-top: 1px solid rgba(255, 215, 0, 0.3);
+
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #6c757d;
+            font-size: 12px;
         }
-        .form-control {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: #fff;
+
+        .form-row {
+            display: flex;
+            gap: 10px;
         }
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #ffd700;
-            color: #fff;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+
+        .form-row .form-group {
+            flex: 1;
         }
-        .nav-link {
-            color: #ffd700 !important;
+
+        /* 打卡记录 */
+        .log-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
         }
-        .nav-link:hover {
-            color: #ffa500 !important;
+
+        .log-item .status {
+            width: 60px;
+            font-weight: 600;
+        }
+
+        .log-item .status.success { color: #28a745; }
+        .log-item .status.failed { color: #dc3545; }
+
+        .log-item .message {
+            flex: 1;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .log-item .time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* 用户信息 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .user-info .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-info .wps-uid {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* 隐藏/显示 */
+        .hidden { display: none !important; }
+
+        /* 链接 */
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .admin-link a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .admin-link a:hover {
+            color: white;
+        }
+
+        /* 时间显示 */
+        .time-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .schedule-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .schedule-info .label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 500px) {
+            .form-row {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Apparition!</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+    <div class="container">
+        <!-- 未登录：扫码登录 -->
+        <div id="login-section" class="card qrcode-section">
+            <h2>扫码登录 WPS</h2>
+            <p>使用微信扫描二维码，授权登录 WPS 账号</p>
+
+            <div class="qrcode-wrapper">
+                <div id="qrcode-container">
+                    <div class="qrcode-placeholder">点击下方按钮<br>获取二维码</div>
+                </div>
+            </div>
+
+            <p id="status-text" class="status-text"></p>
+
+            <button id="get-qrcode-btn" class="btn btn-primary" onclick="startLogin()">
+                获取登录二维码
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#configs">配置管理</a>
-                    </li>
-                </ul>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-warning">退出魔法空间</a>
+        </div>
+
+        <!-- 已登录：用户面板 -->
+        <div id="user-panel" class="hidden">
+            <!-- 用户信息 -->
+            <div class="card">
+                <div class="user-info">
+                    <div>
+                        <div class="name" id="user-nickname">用户</div>
+                        <div class="wps-uid">WPS ID: <span id="user-wps-uid"></span></div>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="logout()">退出登录</button>
+                </div>
+
+                <div class="schedule-info">
+                    <div class="label">打卡时间</div>
+                    <div class="time-display" id="checkin-time">--:--</div>
+                    <div class="label" style="margin-top:5px;">上次打卡: <span id="last-checkin">从未</span></div>
+                </div>
+
+                <button class="btn btn-success btn-block" onclick="manualCheckin()">立即打卡</button>
+            </div>
+
+            <!-- 个人设置 -->
+            <div class="card">
+                <h2>个人设置</h2>
+
+                <div class="form-group">
+                    <label>打卡填写内容</label>
+                    <input type="text" id="input_name" placeholder="例如：1000&张三&">
+                    <small>填写在打卡表单中显示的内容</small>
+                </div>
+
+                <div class="form-group">
+                    <label>昵称</label>
+                    <input type="text" id="nickname" placeholder="用于显示">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>纬度</label>
+                        <input type="number" id="latitude" step="0.0000001">
+                    </div>
+                    <div class="form-group">
+                        <label>经度</label>
+                        <input type="number" id="longitude" step="0.0000001">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>自定义打卡时间（可选）</label>
+                    <div class="form-row">
+                        <select id="checkin_hour">
+                            <option value="">使用系统时间</option>
+                            <script>
+                                for (let i = 0; i < 24; i++) {
+                                    document.write(`<option value="${i}">${i.toString().padStart(2, '0')}时</option>`);
+                                }
+                            </script>
+                        </select>
+                        <select id="checkin_minute">
+                            <option value="">--</option>
+                            <script>
+                                for (let i = 0; i < 60; i += 5) {
+                                    document.write(`<option value="${i}">${i.toString().padStart(2, '0')}分</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                    <small>留空则使用系统默认打卡时间</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Server酱 SendKey（打卡通知）</label>
+                    <input type="text" id="sendkey" placeholder="SCTxxxxxx">
+                    <small>
+                        用于接收打卡结果通知，获取地址：
+                        <a href="https://sct.ftqq.com/sendkey" target="_blank">sct.ftqq.com/sendkey</a>
+                    </small>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="saveConfig()">保存设置</button>
+            </div>
+
+            <!-- 打卡记录 -->
+            <div class="card">
+                <h2>打卡记录</h2>
+                <div id="log-list">
+                    <p style="color: #999; text-align: center;">暂无记录</p>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <div class="container mt-4">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-info">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <!-- 配置管理部分 -->
-        <div id="configs" class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">魔法配置管理</h5>
-            </div>
-            <div class="card-body">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">系统信息</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>操作系统：</strong>{{ system_info.os }}</p>
-                        <p><strong>Python版本：</strong>{{ system_info.python_version }}</p>
-                    </div>
-                </div>
-                <form action="{{ url_for('upload_config') }}" method="post" enctype="multipart/form-data" class="mb-4">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">配置名称</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="config_file" class="form-label">配置文件 (JSON)</label>
-                                <input type="file" class="form-control" id="config_file" name="config_file" accept=".json" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="cookie_file" class="form-label">Cookie文件 (JSON, 可选)</label>
-                                <input type="file" class="form-control" id="cookie_file" name="cookie_file" accept=".json">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">添加新配置</button>
-                </form>
-
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>名称</th>
-                                <th>目标URL</th>
-                                <th>Cookie状态</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if configs %}
-                                {% for config in configs %}
-                                <tr>
-                                    <td>{{ config.id }}</td>
-                                    <td>{{ config.name }}</td>
-                                    <td>{{ config.target_url }}</td>
-                                    <td>
-                                        {% if config.cookie_data %}
-                                            <span class="badge bg-success">已上传</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">未上传</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-primary" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#uploadCookieModal{{ config.id }}">
-                                            上传Cookie
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteConfigModal{{ config.id }}">
-                                            删除
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Upload Cookie Modal -->
-                                <div class="modal fade" id="uploadCookieModal{{ config.id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">上传Cookie - {{ config.name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="{{ url_for('upload_cookie') }}" method="post" enctype="multipart/form-data">
-                                                    <input type="hidden" name="config_id" value="{{ config.id }}">
-                                                    <div class="mb-3">
-                                                        <label for="cookie_file{{ config.id }}" class="form-label">Cookie文件 (JSON)</label>
-                                                        <input type="file" class="form-control" 
-                                                               id="cookie_file{{ config.id }}" 
-                                                               name="cookie_file" 
-                                                               accept=".json" required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">上传</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Delete Config Modal -->
-                                <div class="modal fade" id="deleteConfigModal{{ config.id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">删除配置 - {{ config.name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>确定要删除这个配置吗？此操作不可恢复。</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <form action="{{ url_for('delete_config_route') }}" method="post">
-                                                    <input type="hidden" name="config_id" value="{{ config.id }}">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                                                    <button type="submit" class="btn btn-danger">确认删除</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center">暂无配置</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- 管理员入口 -->
+        <div class="admin-link">
+            <a href="/admin">管理员入口</a>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ==================== 全局变量 ====================
+        let currentUser = null;
+        let currentChannelId = null;
+        let pollInterval = null;
+
+        // ==================== 初始化 ====================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkLogin();
+        });
+
+        async function checkLogin() {
+            try {
+                const response = await fetch('/api/me');
+                const data = await response.json();
+
+                if (data.logged_in) {
+                    currentUser = data.user;
+                    showUserPanel();
+                } else {
+                    showLoginSection();
+                }
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+                showLoginSection();
+            }
+        }
+
+        function showLoginSection() {
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('user-panel').classList.add('hidden');
+        }
+
+        function showUserPanel() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('user-panel').classList.remove('hidden');
+
+            // 填充用户信息
+            document.getElementById('user-nickname').textContent = currentUser.nickname || '用户' + currentUser.wps_uid;
+            document.getElementById('user-wps-uid').textContent = currentUser.wps_uid;
+            document.getElementById('last-checkin').textContent = currentUser.last_checkin || '从未';
+
+            // 打卡时间
+            if (currentUser.checkin_hour !== null && currentUser.checkin_minute !== null) {
+                document.getElementById('checkin-time').textContent =
+                    `${String(currentUser.checkin_hour).padStart(2,'0')}:${String(currentUser.checkin_minute).padStart(2,'0')} (自定义)`;
+            } else {
+                loadSystemSchedule();
+            }
+
+            // 填充表单
+            document.getElementById('input_name').value = currentUser.input_name || '';
+            document.getElementById('nickname').value = currentUser.nickname || '';
+            document.getElementById('latitude').value = currentUser.latitude || 100;
+            document.getElementById('longitude').value = currentUser.longitude || 100;
+            document.getElementById('sendkey').value = currentUser.sendkey || '';
+
+            if (currentUser.checkin_hour !== null) {
+                document.getElementById('checkin_hour').value = currentUser.checkin_hour;
+            }
+            if (currentUser.checkin_minute !== null) {
+                document.getElementById('checkin_minute').value = currentUser.checkin_minute;
+            }
+
+            // 加载打卡记录
+            loadLogs();
+        }
+
+        async function loadSystemSchedule() {
+            try {
+                const response = await fetch('/api/schedules');
+                const schedules = await response.json();
+                const enabled = schedules.filter(s => s.is_enabled);
+                if (enabled.length > 0) {
+                    document.getElementById('checkin-time').textContent = enabled[0].time_str + ' (系统)';
+                }
+            } catch (error) {
+                console.error('加载系统时间失败:', error);
+            }
+        }
+
+        // ==================== 登录流程 ====================
+        async function startLogin() {
+            const btn = document.getElementById('get-qrcode-btn');
+            const statusText = document.getElementById('status-text');
+            const qrcodeContainer = document.getElementById('qrcode-container');
+
+            btn.disabled = true;
+            btn.textContent = '获取中...';
+            statusText.textContent = '';
+            statusText.className = 'status-text';
+
+            try {
+                const response = await fetch('/api/login/start', { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentChannelId = data.channel_id;
+                    qrcodeContainer.innerHTML = `<img src="${data.qrcode_url}" alt="登录二维码">`;
+                    statusText.textContent = '请使用微信扫描二维码';
+                    btn.textContent = '刷新二维码';
+                    btn.disabled = false;
+                    startPolling();
+                } else {
+                    throw new Error(data.detail || '获取二维码失败');
+                }
+            } catch (error) {
+                statusText.textContent = '获取二维码失败: ' + error.message;
+                statusText.className = 'status-text error';
+                btn.textContent = '重新获取';
+                btn.disabled = false;
+            }
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+
+            pollInterval = setInterval(async () => {
+                if (!currentChannelId) return;
+
+                try {
+                    const response = await fetch(`/api/login/status/${currentChannelId}`);
+                    const data = await response.json();
+                    const statusText = document.getElementById('status-text');
+
+                    switch (data.status) {
+                        case 'waiting':
+                            statusText.textContent = '等待扫码...';
+                            break;
+                        case 'scanning':
+                            statusText.textContent = '已扫码，正在登录...';
+                            break;
+                        case 'success':
+                            statusText.textContent = '登录成功！';
+                            statusText.className = 'status-text success';
+                            clearInterval(pollInterval);
+                            pollInterval = null;
+                            currentChannelId = null;
+                            // 重新检查登录状态
+                            await checkLogin();
+                            break;
+                        case 'failed':
+                            statusText.textContent = '登录失败: ' + (data.error || '未知错误');
+                            statusText.className = 'status-text error';
+                            clearInterval(pollInterval);
+                            pollInterval = null;
+                            currentChannelId = null;
+                            break;
+                    }
+                } catch (error) {
+                    console.error('轮询出错:', error);
+                }
+            }, 2000);
+        }
+
+        // ==================== 用户操作 ====================
+        async function saveConfig() {
+            const config = {
+                input_name: document.getElementById('input_name').value,
+                nickname: document.getElementById('nickname').value,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value),
+                sendkey: document.getElementById('sendkey').value
+            };
+
+            // 打卡时间
+            const hour = document.getElementById('checkin_hour').value;
+            const minute = document.getElementById('checkin_minute').value;
+            if (hour !== '' && minute !== '') {
+                config.checkin_hour = parseInt(hour);
+                config.checkin_minute = parseInt(minute);
+            } else {
+                config.checkin_hour = null;
+                config.checkin_minute = null;
+            }
+
+            try {
+                const response = await fetch('/api/me', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                if (response.ok) {
+                    alert('设置保存成功！');
+                    await checkLogin();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.detail || '保存失败');
+                }
+            } catch (error) {
+                alert('保存失败: ' + error.message);
+            }
+        }
+
+        async function manualCheckin() {
+            if (!confirm('确定要立即执行打卡吗？')) return;
+
+            try {
+                const response = await fetch('/api/me/checkin', { method: 'POST' });
+                if (response.ok) {
+                    alert('打卡任务已提交，请稍后查看记录');
+                    setTimeout(loadLogs, 3000);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.detail || '打卡失败');
+                }
+            } catch (error) {
+                alert('打卡失败: ' + error.message);
+            }
+        }
+
+        async function loadLogs() {
+            const container = document.getElementById('log-list');
+
+            try {
+                const response = await fetch('/api/me/logs?limit=10');
+                const logs = await response.json();
+
+                if (logs.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center;">暂无记录</p>';
+                    return;
+                }
+
+                container.innerHTML = logs.map(log => `
+                    <div class="log-item">
+                        <span class="status ${log.status}">${log.status === 'success' ? '成功' : '失败'}</span>
+                        <span class="message">${log.message || '-'}</span>
+                        <span class="time">${log.created_at}</span>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                container.innerHTML = `<p style="color: #dc3545; text-align: center;">加载失败</p>`;
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/me/logout', { method: 'POST' });
+                currentUser = null;
+                showLoginSection();
+                // 重置扫码界面
+                document.getElementById('qrcode-container').innerHTML =
+                    '<div class="qrcode-placeholder">点击下方按钮<br>获取二维码</div>';
+                document.getElementById('status-text').textContent = '';
+            } catch (error) {
+                console.error('登出失败:', error);
+            }
+        }
+    </script>
 </body>
-</html> 
+</html>
